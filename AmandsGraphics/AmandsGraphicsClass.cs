@@ -602,7 +602,7 @@ namespace AmandsGraphics
         {
             if (SurroundDepthOfField && backLens != null)
             {
-                SurroundDepthOfFieldFocusDistance = Mathf.Clamp(Vector3.Distance(Camera.current.transform.position, backLens.position),0.001f,1f);
+                SurroundDepthOfFieldFocusDistance = Mathf.Clamp(Vector3.Distance(Camera.current.transform.position, backLens.position), 0.001f, 1f);
             }
             else
             {
@@ -624,7 +624,7 @@ namespace AmandsGraphics
                         FPSCameraCamera = FPSCamera.GetComponent<Camera>();
                     }
                     FPSCameraPostProcessVolume = FPSCamera.GetComponent<PostProcessVolume>();
-                    if (FPSCameraPostProcessVolume != null)
+                    if (FPSCameraPostProcessVolume != null && FPSCameraPostProcessVolume.profile != null)
                     {
                         FPSCameraPostProcessVolume.profile.TryGetSettings<UnityEngine.Rendering.PostProcessing.MotionBlur>(out FPSCameraMotionBlur);
                         if (FPSCameraMotionBlur == null)
@@ -674,7 +674,7 @@ namespace AmandsGraphics
                     }
                     scene = SceneManager.GetActiveScene().name;
                     if (!sceneLevelSettings.ContainsKey(scene)) scene = "default";
-                    levelSettings = GameObject.Find(sceneLevelSettings[scene]).GetComponent<LevelSettings>();
+                    levelSettings = GameObject.Find(sceneLevelSettings[scene])?.GetComponent<LevelSettings>();
                     if (levelSettings != null)
                     {
                         defaultZeroLevel = levelSettings.ZeroLevel;
@@ -720,19 +720,24 @@ namespace AmandsGraphics
                     weatherController = WeatherController.Instance;
                     if (weatherController != null)
                     {
-                        if (weatherController.TimeOfDayController != null) defaultGradientColorKeys = weatherController.TimeOfDayController.LightColor.colorKeys;
-                        toDController = weatherController.TimeOfDayController;
-                        if (toDController != null)
+
+                        if (weatherController.TimeOfDayController != null && weatherController.TimeOfDayController.LightColor != null)
+                            defaultGradientColorKeys = weatherController.TimeOfDayController.LightColor.colorKeys;
+                        if (weatherController.TimeOfDayController != null)
                         {
+                            toDController = weatherController.TimeOfDayController;
                             defaultAmbientBrightness = toDController.AmbientBrightness;
                             defaultAmbientContrast = toDController.AmbientContrast;
                             defaultScatteringBrightnessMultiplier = toDController.ScatteringBrightnessMultiplier;
                         }
+
                         tOD_Sky = TOD_Sky.Instance;
                         if (tOD_Sky != null)
                         {
-                            defaultSunMeshBrightness = tOD_Sky.Sun.MeshBrightness;
-                            defaultLightIntensity = tOD_Sky.Night.LightIntensity;
+                            if (tOD_Sky.Sun != null)
+                                defaultSunMeshBrightness = tOD_Sky.Sun.MeshBrightness;
+                            if (tOD_Sky.Night != null)
+                                defaultLightIntensity = tOD_Sky.Night.LightIntensity;
                         }
                     }
                     FPSCameraNightVision = FPSCamera.GetComponent<NightVision>();
@@ -933,7 +938,7 @@ namespace AmandsGraphics
                     toDController.ScatteringBrightnessMultiplier = defaultScatteringBrightnessMultiplier * AmandsGraphicsPlugin.SkyBrightness.Value;
                 }
             }
-            if (tOD_Sky != null)
+            if (tOD_Sky != null && tOD_Sky.Sun != null && tOD_Sky.Moon != null && tOD_Sky.Night != null)
             {
                 tOD_Sky.Sun.MeshBrightness = AmandsGraphicsPlugin.SunMeshBrightness.Value;
                 tOD_Sky.Moon.MeshBrightness = 3f;
@@ -1319,7 +1324,7 @@ namespace AmandsGraphics
             {
                 Traverse.Create(mBOIT_Scattering).Field("ZeroLevel").SetValue(defaultMBOITZeroLevel);
             }
-            foreach (KeyValuePair<Light,float> changedLight in registeredLights)
+            foreach (KeyValuePair<Light, float> changedLight in registeredLights)
             {
                 changedLight.Key.range = changedLight.Value;
             }

@@ -1,6 +1,3 @@
-
-using SPT.Common.Utils;
-using SPT.Reflection.Patching;
 using BepInEx;
 using BepInEx.Configuration;
 using System;
@@ -16,6 +13,7 @@ using EFT.UI;
 using System.Collections.Generic;
 using EFT;
 using System.Threading.Tasks;
+using Aki.Reflection.Patching;
 
 namespace AmandsGraphics
 {
@@ -623,10 +621,10 @@ namespace AmandsGraphics
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(CameraClass).GetMethod("Blur", BindingFlags.Instance | BindingFlags.Public);
+            return typeof(FPSCamera).GetMethod("Blur", BindingFlags.Instance | BindingFlags.Public);
         }
         [PatchPrefix]
-        private static bool PatchPrefix(ref CameraClass __instance, bool isActive, float time)
+        private static bool PatchPrefix(ref FPSCamera __instance, bool isActive, float time)
         {
             AmandsGraphicsClass.CameraClassBlur = isActive;
             if (!isActive && __instance.IsActive)
@@ -764,10 +762,10 @@ namespace AmandsGraphics
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(EFT.UI.EftBattleUIScreen).GetMethods(BindingFlags.Instance | BindingFlags.Public).First(x => x.Name == "Show" && x.GetParameters()[0].Name == "owner");
+            return typeof(EFT.UI.BattleUIScreen).GetMethods(BindingFlags.Instance | BindingFlags.Public).First(x => x.Name == "Show" && x.GetParameters()[0].Name == "owner");
         }
         [PatchPostfix]
-        private static void PatchPostFix(ref EFT.UI.EftBattleUIScreen __instance)
+        private static void PatchPostFix(ref EFT.UI.BattleUIScreen __instance)
         {
             if (AmandsGraphicsClass.ActiveUIScreen == __instance.gameObject) return;
             AmandsGraphicsClass.ActiveUIScreen = __instance.gameObject;
